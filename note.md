@@ -51,5 +51,8 @@ export default Configuration;
   正常解释typeScript, 需要安装`rollup-plugin-typescript2`插件
 - pnpm i @rollup/plugin-typescript -D -w
 
-  20.书写打包react的rollup配置,及打包命令
-  21. 安装`rollup-plugin-generate-package-json`库，用来打包生成package.json文件
+  20.书写打包react的rollup配置,及打包命令21. 安装`rollup-plugin-generate-package-json`库，用来打包生成package.json文件
+  22. 新增apps文件夹，并使用create-react-app创建项目，用来管理调试mini-react 
+  23. 为了调试本地的react代码，需要在dist/node_modules/react下执行`pnpm link --global`，链接到全局，然后再到apps/react_demo下执行`pnpm link --global react`,
+  将本地包连接使用
+  24.更新react内容，添加jsxDEV方法
