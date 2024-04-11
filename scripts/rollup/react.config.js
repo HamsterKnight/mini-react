@@ -19,6 +19,8 @@ export default [
 		plugins: [
 			...getBaseRollupPlugins(),
 			generatePackageJson({
+				inputFolder: pkgPath,
+				outputFolder: pkgDistPath,
 				baseContents: ({name, description, version}) => ({
 					name: name,
 					main: 'index.js',
