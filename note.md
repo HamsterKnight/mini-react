@@ -42,6 +42,13 @@ const Configuration = {
 export default Configuration;
 ```
 
-15.集成 commitlint 到 husky 中，`echo  'npx --no-install commitlint -e "$1"' > .husky/commit-msg`
-16. 增加ts的配置文件`tsconfig.json`
-17. packages下增加react文件夹，用来保存react相关内容
+15.集成 commitlint 到 husky 中，`echo  'npx --no-install commitlint -e "$1"' > .husky/commit-msg` 16. 增加ts的配置文件`tsconfig.json` 17. packages下增加react文件夹，用来保存react相关内容18. 增加shared文件夹保存公用方法19. 增加script文件夹，并输入rollup配置，用来对内容进行打包
+安装rollup
+
+- pnpm i rollup -D -w
+  能正常解释commonJs模块，需要安装`@rollup/plugin-commonjs`插件
+- pnpm i @rollup/plugin-commonjs -D -w
+  正常解释typeScript, 需要安装`rollup-plugin-typescript2`插件
+- pnpm i @rollup/plugin-typescript -D -w
+
+  20.书写打包react的rollup配置,及打包命令
