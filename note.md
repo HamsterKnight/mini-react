@@ -44,3 +44,4 @@ export default Configuration;
 
 15.集成 commitlint 到 husky 中，`echo  'npx --no-install commitlint -e "$1"' > .husky/commit-msg`
 16. 增加ts的配置文件`tsconfig.json`
+17. packages下增加react文件夹，用来保存react相关内容
