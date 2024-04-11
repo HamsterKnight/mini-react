@@ -52,3 +52,4 @@ export default Configuration;
 - pnpm i @rollup/plugin-typescript -D -w
 
   20.书写打包react的rollup配置,及打包命令
+  21. 安装`rollup-plugin-generate-package-json`库，用来打包生成package.json文件
