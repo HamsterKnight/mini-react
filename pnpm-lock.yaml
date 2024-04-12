@@ -44,6 +44,21 @@ importers:
       typescript: registry.npmmirror.com/typescript/5.4.4
       typescript-eslint: registry.npmmirror.com/typescript-eslint/7.5.0_rkx3huv3cvvtalar5rt2yq2pke
 
+  packages/react:
+    specifiers:
+      shared: workspace:*
+    devDependencies:
+      shared: link:../shared
+
+  packages/react-reconciler:
+    specifiers:
+      shared: 'workspace: *'
+    devDependencies:
+      shared: link:../shared
+
+  packages/shared:
+    specifiers: {}
+
 packages:
 
   registry.npmmirror.com/@aashutoshrathi/word-wrap/1.2.6:
