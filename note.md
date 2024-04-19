@@ -144,3 +144,44 @@ DFS深度优先遍历与BFS广度优先遍历详解
 ·递：对应beginWork
 
 ·归：对应completeWork 
+
+## <b>如何触发更新</b>
+常见的触发更新的方式：
+
+·ReactDOM.createRoot().render （或老版的ReactDOM.render）
+
+·this.setState
+
+·useState的dispatch方法
+
+我们希望实现一套统一的更新机制，他的特点是：
+
+·兼容上述触发更新的方式
+
+·方便后续扩展（优先级机制...）更新机制的组成部分
+
+·代表更新的数据结构——Update
+
+·消费update的数据结构——
+
+UpdateQueue 
+![alt text](nodeImg/update-queue.png)
+
+
+接下来的工作包括：
+
+·实现mount时调用的API
+
+·将该API接入上述更新机制中需要考虑的事情：
+
+·更新可能发生于任意组件，而更新流程是从根节点递归的
+
+·需要一个统一的根节点保存通用信息 
+```js
+// 比如
+React.createRoot(rootElement).render(<App/>)
+```
+![alt text](nodeImg/mount.png)
+
+# 为什么hostConfig.ts需要在tsconfig.json中进行配置路径，而不是直接通过相对路径进行文件引入呢？
+> 因为React是可以用在非浏览器的宿主环境的，每个环境的hostConfig内容都不一样，如果用相对路径，则限定死了hostConfig的文件内容
