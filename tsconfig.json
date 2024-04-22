@@ -1,6 +1,6 @@
 {
 	"compileOnSave": true,
-	"include": ["./packages/**/*"],
+	"include": ["./packages/**/*","typing.d.ts" ],
 	"compilerOptions": {
 		"target": "ESNext",
 		"useDefineForClassFields": true,
@@ -18,7 +18,7 @@
 		"noImplicitReturns": false,
 		"skipLibCheck": true,
 		"baseUrl": "./packages",
-        "noImplicitAny": false,
+		"noImplicitAny": false,
 		"paths": {
 			"hostConfig": ["./react-reconciler/src/hostConfig.ts"]
 		}

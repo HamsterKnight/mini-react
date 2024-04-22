@@ -185,3 +185,100 @@ React.createRoot(rootElement).render(<App/>)
 
 # 为什么hostConfig.ts需要在tsconfig.json中进行配置路径，而不是直接通过相对路径进行文件引入呢？
 > 因为React是可以用在非浏览器的宿主环境的，每个环境的hostConfig内容都不一样，如果用相对路径，则限定死了hostConfig的文件内容
+
+## 初探mount流程
+更新流程的目的：
+
+
+·生成wip fiberNode树
+
+·标记副作用flags
+
+更新流程的步骤：
+
+·递：beginWork
+
+·归：completeWork beginWork
+
+对于如下结构的reactElement： 
+```HTML
+<A>
+	<B></B>  
+</A>
+```
+当进入A的beginWork时，通过对比B current fiberNode与B reactElement， 生成B对应wip fiberNode.
+在此过程中最多会标记2类与「结构变化」相关的flags：
+·Placement
+插入：a-＞ab 移动：abc -＞ bca
+·ChildDeletion
+:ul>li*3->ul>li*1
+不包含与「属性变化」相关的flag：Update
+
+＜img title＝＂鸡＂／＞ -＞ ＜img title＝＂你太 美＂＞
+实现与Host相关节点的beginWork
+
+首先，为开发环境增加＿DEV＿标识，方便Dev包打印更多信息：
+```sh
+pnpm i @rollup/plugin-replace -D -w
+```
+HostRoot的beginWork工作流程： 
+1．计算状态的最新值
+
+2．创造子fiberNode
+
+HostComponent的beginWork工作流 程：
+
+1．创造子fiberNode
+
+HostText没有beginWork工作流程
+
+（因 为他没有子节点）
+```HTML
+<p>唱跳rap</p>
+```
+
+
+
+
+#### beginWork性能优化策略
+ 考虑如下结构的reactElement： 
+```html
+<div>
+  <p>练习时长</p>
+  <span>两年半</span>
+</div>
+```
+
+理论上mount流程完毕后包含的flags：
+
+·两年半 Placement
+
+·span Placement
+
+·练习时长 Placement
+
+·p Placement
+
+·div Placement
+
+相比于执行5次Placment，我们可以构建好「离屏DOM树」后，对div执行1次Placement操作
+
+completeWork 需要解决的问题：
+
+·对于Host类型fiberNode：构建离屏 DOM树
+标记Update flag(todo)
+
+#### completeWork
+
+需要解决的问题：
+
+对于Host类型fiberNode：构建离屏DOM树
+
+标记Update flag （TODO）
+
+completeWork性能优化策略
+
+flags分布在不同fiberNode中，如何快速找到他们？
+
+答案：利用completeWork向上遍历（归）的流程，将子fiberNode的flags冒泡到父fiberNode
+

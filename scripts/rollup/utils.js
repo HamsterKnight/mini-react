@@ -3,6 +3,7 @@ import fs from 'fs';
 
 import cjs from '@rollup/plugin-commonjs';
 import ts from 'rollup-plugin-typescript2';
+import replace from '@rollup/plugin-replace';
 
 // 公共打包路径前缀
 const commonCompilePath = path.resolve(__dirname, '../../packages');
@@ -34,5 +35,5 @@ export function getBaseRollupPlugins({
 	},
 	typescript = {}
 } = {}) {
-	return [cjs(), ts(typescript)];
+	return [replace(alias), cjs(), ts(typescript)];
 }

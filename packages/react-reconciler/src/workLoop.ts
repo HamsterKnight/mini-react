@@ -20,7 +20,7 @@ export function scheduleUpdateOnFiber(fiber: FiberNode) {
 export function markUpdateFromFiberToRoot(fiber: FiberNode) {
 	let node = fiber;
 	let parent = node.return;
-	if (parent !== null) {
+	while (parent !== null) {
 		node = parent;
 		parent = node.return;
 	}
@@ -40,11 +40,21 @@ function renderRoot(root: FiberRootNode) {
 			workLoop();
 			break;
 		} catch (e) {
-			console.log('workLoop发生错误', e);
+			// 已经声明__DEV__知道为什么不生效,只能在根目录下生效
+			if (__DEV__) {
+				console.log('workLoop发生错误', e);
+			}
+
 			workInProgress = null;
 		}
 		// eslint-disable-next-line no-constant-condition
 	} while (true);
+	// 这样root.current.alternate上就是我们构建好的fiber树
+
+	const finishedWork = root.current.alternate;
+	root.finishedWork = finishedWork;
+	// 执行渲染
+	commitRoot(root);
 }
 
 function workLoop() {
