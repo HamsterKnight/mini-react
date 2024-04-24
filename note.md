@@ -51,81 +51,71 @@ export default Configuration;
   正常解释typeScript, 需要安装`rollup-plugin-typescript2`插件
 - pnpm i @rollup/plugin-typescript -D -w
 
-  20.书写打包react的rollup配置,及打包命令21. 安装`rollup-plugin-generate-package-json`库，用来打包生成package.json文件
-  22. 新增apps文件夹，并使用create-react-app创建项目，用来管理调试mini-react 
-  23. 为了调试本地的react代码，需要在dist/node_modules/react下执行`pnpm link --global`，链接到全局，然后再到apps/react_demo下执行`pnpm link --global react`,
-  将本地包连接使用
-  24. 更新react内容，添加jsxDEV方法
-  25. react-reconciler协调器
+  20.书写打包react的rollup配置,及打包命令21. 安装`rollup-plugin-generate-package-json`库，用来打包生成package.json文件22. 新增apps文件夹，并使用create-react-app创建项目，用来管理调试mini-react 23. 为了调试本地的react代码，需要在dist/node_modules/react下执行`pnpm link --global`，链接到全局，然后再到apps/react_demo下执行`pnpm link --global react`,
+  将本地包连接使用24. 更新react内容，添加jsxDEV方法25. react-reconciler协调器
   核心模块消费JSX的过程
 
-	核心模块操作的数据结构是？当前已知的数据结构：React Element （JSX转换 playground）
+  核心模块操作的数据结构是？当前已知的数据结构：React Element （JSX转换 playground）
 
-	React Element如果作为核心模块操作 的数据结构，存在的问题：
+  React Element如果作为核心模块操作 的数据结构，存在的问题：
 
-	·无法表达节点之间的关系
+  ·无法表达节点之间的关系
 
-	·字段有限，不好拓展（比如：无法表达状态）
+  ·字段有限，不好拓展（比如：无法表达状态）
 
-	所以，需要一种新的数据结构，他的特点：
+  所以，需要一种新的数据结构，他的特点：
 
-	·介于React Element与真实UI节点之 间
+  ·介于React Element与真实UI节点之 间
 
-	·能够表达节点之间的关系
+  ·能够表达节点之间的关系
 
-	·方便拓展（不仅作为数据存储单元，也能作为工作单元）
+  ·方便拓展（不仅作为数据存储单元，也能作为工作单元）
 
-	这就是FiberNode
+  这就是FiberNode
 
-	（虚拟DOM在React 中的实现）
+  （虚拟DOM在React 中的实现）
 
-	当前我们了解的节点类型：
+  当前我们了解的节点类型：
 
-	·JSX
+  ·JSX
 
-	·React Element
+  ·React Element
 
-	·FiberNode
+  ·FiberNode
 
-	·DOM Element 
+  ·DOM Element
 
-	26reconciler的工作方式
+  26reconciler的工作方式
 
-	对于同一个节点，比较其ReactElement与fiberNode(ReactElement中存储着数据，fiberNode中也存储着数据)，生成子
+  对于同一个节点，比较其ReactElement与fiberNode(ReactElement中存储着数据，fiberNode中也存储着数据)，生成子
 
-	fiberNode。并根据比较的结果生成不同标记（插入、删除、移动.....），对应不同
+  fiberNode。并根据比较的结果生成不同标记（插入、删除、移动.....），对应不同
 
-	宿主环境API的执行
-	![alt text](./nodeImg/image.png)
+  宿主环境API的执行
+  ![alt text](./nodeImg/image.png)
 
-	比如，挂载`<div></div>`
+  比如，挂载`<div></div>`
+
 ```html
-	// React Element <div></div>
-	 jsx("div")
-	/／对应fiberNode
-	null
-	／／ 生成子fiberNode  
-	／／对应标记 
-	Placement 
+// React Element
+<div></div>
+jsx("div") /／对应fiberNode null ／／ 生成子fiberNode ／／对应标记 Placement
 ```
 
-
 将`<div></div>`更新为`<p></p>`
+
 ```html
-	// React Element <p></p>
-	 jsx("p")
-	/／对应fiberNode
-	FiberNode {type: 'diev'}
-	／／ 生成子fiberNode  
-	／／对应标记 
-	Deletion Placement
+// React Element
+<p></p>
+jsx("p") /／对应fiberNode FiberNode {type: 'diev'} ／／ 生成子fiberNode
+／／对应标记 Deletion Placement
 ```
 
 当所有React Element比较完后，会生 成一棵fiberNode树，一共会存在两棵fiberNode树：
 
 ·current：与视图中真实UI对应的fiberNode树
 
-·workInProgress：触发更新后，正 在reconciler中计算的fiberNode树 
+·workInProgress：触发更新后，正 在reconciler中计算的fiberNode树
 <b>双缓冲技术介绍</b>
 JSX消费的顺序
 DFS深度优先遍历与BFS广度优先遍历详解
@@ -133,19 +123,22 @@ DFS深度优先遍历与BFS广度优先遍历详解
 ·如果有子节点，遍历子节点
 ·如果没有子节点，遍历兄弟节点
 以DFS（深度优先遍历）的顺序遍历React Element，这意味着：
+
 ```html
 <Card>
 	＜h3＞你好</h3＞
 	<p>Big-React</p>
 </Card>
 ```
+
 这是个递归的过程，存在递、归两个阶段：
 
 ·递：对应beginWork
 
-·归：对应completeWork 
+·归：对应completeWork
 
 ## <b>如何触发更新</b>
+
 常见的触发更新的方式：
 
 ·ReactDOM.createRoot().render （或老版的ReactDOM.render）
@@ -164,9 +157,8 @@ DFS深度优先遍历与BFS广度优先遍历详解
 
 ·消费update的数据结构——
 
-UpdateQueue 
+UpdateQueue
 ![alt text](nodeImg/update-queue.png)
-
 
 接下来的工作包括：
 
@@ -176,19 +168,22 @@ UpdateQueue
 
 ·更新可能发生于任意组件，而更新流程是从根节点递归的
 
-·需要一个统一的根节点保存通用信息 
+·需要一个统一的根节点保存通用信息
+
 ```js
 // 比如
-React.createRoot(rootElement).render(<App/>)
+React.createRoot(rootElement).render(<App />);
 ```
+
 ![alt text](nodeImg/mount.png)
 
 # 为什么hostConfig.ts需要在tsconfig.json中进行配置路径，而不是直接通过相对路径进行文件引入呢？
+
 > 因为React是可以用在非浏览器的宿主环境的，每个环境的hostConfig内容都不一样，如果用相对路径，则限定死了hostConfig的文件内容
 
 ## 初探mount流程
-更新流程的目的：
 
+更新流程的目的：
 
 ·生成wip fiberNode树
 
@@ -200,12 +195,14 @@ React.createRoot(rootElement).render(<App/>)
 
 ·归：completeWork beginWork
 
-对于如下结构的reactElement： 
+对于如下结构的reactElement：
+
 ```HTML
 <A>
-	<B></B>  
+	<B></B>
 </A>
 ```
+
 当进入A的beginWork时，通过对比B current fiberNode与B reactElement， 生成B对应wip fiberNode.
 在此过程中最多会标记2类与「结构变化」相关的flags：
 ·Placement
@@ -218,10 +215,12 @@ React.createRoot(rootElement).render(<App/>)
 实现与Host相关节点的beginWork
 
 首先，为开发环境增加＿DEV＿标识，方便Dev包打印更多信息：
+
 ```sh
 pnpm i @rollup/plugin-replace -D -w
 ```
-HostRoot的beginWork工作流程： 
+
+HostRoot的beginWork工作流程：
 1．计算状态的最新值
 
 2．创造子fiberNode
@@ -233,19 +232,19 @@ HostComponent的beginWork工作流 程：
 HostText没有beginWork工作流程
 
 （因 为他没有子节点）
+
 ```HTML
 <p>唱跳rap</p>
 ```
 
-
-
-
 #### beginWork性能优化策略
- 考虑如下结构的reactElement： 
+
+考虑如下结构的reactElement：
+
 ```html
 <div>
-  <p>练习时长</p>
-  <span>两年半</span>
+	<p>练习时长</p>
+	<span>两年半</span>
 </div>
 ```
 
@@ -282,3 +281,43 @@ flags分布在不同fiberNode中，如何快速找到他们？
 
 答案：利用completeWork向上遍历（归）的流程，将子fiberNode的flags冒泡到父fiberNode
 
+### 第六课 初探ReactDOM
+
+react内部3个阶段：
+
+·schedule阶段
+
+·render阶段（beginWork completeWork）
+
+·commit阶段（commitWork）
+
+commit阶段的3个子阶段
+
+·beforeMutation阶段
+
+·mutation阶段
+
+·layout阶段
+
+当前commit阶段要执行的任务1．fiber树的切换
+
+2．执行Placement对应操作
+
+需要注意的问题，考虑如下JSX，如果span含有flag，该如何找到它：
+
+```html
+<App>
+	<div>
+		<span>只因</span>
+	</div>
+</App>
+```
+
+打包ReactDOM 需要注意的虚：
+
+·兼容原版React的导出
+
+> react-dom需要打包出两个文件，一个是index.js，一个是client.js
+> ·处理hostConfig的指向
+> tsconfig.json配置hostConfig的路径，只是用于ts的类型检查
+> 打包时，rollup不知道hostConfig的路径，所以需要通过插件`@rollup/plugin-alias`来进行配置

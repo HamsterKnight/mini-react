@@ -57,7 +57,7 @@ export class FiberNode {
 }
 
 export class FiberRootNode {
-	container: Container;
+	container: Container; // 挂载原生宿主环境的节点
 	current: FiberNode;
 	finishedWork: FiberNode | null; //保存整个递归流程已经完成的hostRootFiber
 	constructor(container: Container, hostRootFiber: FiberNode) {

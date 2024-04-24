@@ -20,7 +20,7 @@
 		"baseUrl": "./packages",
 		"noImplicitAny": false,
 		"paths": {
-			"hostConfig": ["./react-reconciler/src/hostConfig.ts"]
+			"hostConfig": ["./react-dom/src/hostConfig.ts"]
 		}
 	}
 }
