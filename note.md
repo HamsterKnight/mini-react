@@ -321,3 +321,21 @@ commit阶段的3个子阶段
 > ·处理hostConfig的指向
 > tsconfig.json配置hostConfig的路径，只是用于ts的类型检查
 > 打包时，rollup不知道hostConfig的路径，所以需要通过插件`@rollup/plugin-alias`来进行配置
+
+
+### 第七课 初探FC与实现
+
+第二种调试方式 FunctionComponent需要考虑的问题：
+
+·如何支持FC？
+
+·如何组织Hooks？（下一节课讲解）如何支持FC？
+
+FC的工作同样植根于：
+
+·beginWork
+
+·completeWork 第二种调试方式
+
+采用vite的实时调试，他的好处是「实时看到源码运行效果」。
+

@@ -6,7 +6,7 @@ import {
 	createTextInstance
 } from 'hostConfig';
 import {FiberNode} from './fiber';
-import {HostComponent, HostRoot, HostText} from './workTags';
+import {FunctionComponent, HostComponent, HostRoot, HostText} from './workTags';
 import {NoFlags} from './fiberFalgs';
 // completeWork是向上遍历的过程， 所以遍历到的节点是最靠上的节点，
 // 然后每次都运行bubbleProperties，这样就将当前节点中的子节点及兄弟节点的包含的flag副作用
@@ -45,6 +45,9 @@ export const completeWork = (wip: FiberNode) => {
 		case HostRoot:
 			bubbleProperties(wip);
 			return null;
+		case FunctionComponent:
+			bubbleProperties(wip);
+			return null;
 		default:
 			if (__DEV__) {
 				console.warn('未处理的completeWork情况', wip);
@@ -61,6 +64,7 @@ function appendAllChildren(parent: Container | Instance, wip: FiberNode) {
 		if (node.tag === HostComponent || node.tag === HostText) {
 			appendInitialChild(parent, node?.stateNode);
 		} else if (node.child !== null) {
+			// TODO 这里也有点疑问，就是这里真的会进来吗
 			node.child.return = node;
 			node = node.child;
 			continue;
@@ -85,7 +89,6 @@ function appendAllChildren(parent: Container | Instance, wip: FiberNode) {
 function bubbleProperties(wip: FiberNode) {
 	let subTreeFlags = NoFlags;
 	let child = wip.child;
-
 	// 逻辑或的方式，兼并标记
 	while (child !== null) {
 		subTreeFlags |= child.subtreeFlags;

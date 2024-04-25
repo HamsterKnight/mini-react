@@ -38,6 +38,7 @@ export class FiberNode {
 		this.return = null;
 		// 指向右侧兄弟fiberNode
 		this.sibling = null;
+		// 指向孩子
 		this.child = null;
 		// 比如当前有li*3,index表示当前标签索引位置
 		this.index = 0;
@@ -52,6 +53,7 @@ export class FiberNode {
 		this.alternate = null;
 		// 副作用
 		this.flags = NoFlags;
+		// 子树是否有副作用
 		this.subtreeFlags = NoFlags;
 	}
 }

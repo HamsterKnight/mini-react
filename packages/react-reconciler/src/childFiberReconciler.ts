@@ -27,7 +27,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 	}
 
 	function placeSingleChild(fiber: FiberNode) {
-		// 首屏渲染，标记肯定是插入
+		// 首屏渲染时，标记肯定是插入
 		if (shouldTrackEffects && fiber.alternate === null) {
 			fiber.flags |= Placement;
 		}

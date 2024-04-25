@@ -9,16 +9,18 @@ import {HostRoot} from './workTags';
 let workInProgress: FiberNode | null = null;
 
 function prepareFreshStack(root: FiberRootNode) {
+	// workInProgress：触发更新后，正在reconciler中计算的fiberNode树，首屏渲染得到的类型是hostRootFiber
 	workInProgress = createWorkInProgress(root.current, {});
 }
 // 实现调度功能
 export function scheduleUpdateOnFiber(fiber: FiberNode) {
+	// 找到最顶层的fiberRootNode
 	const root = markUpdateFromFiberToRoot(fiber);
 	// 进行渲染
 	renderRoot(root);
 }
 
-// 从触发更新的fiber开始，寻找最顶层的fiberNode
+// 从触发更新的fiber开始，寻找到最顶层的fiberRootNode
 export function markUpdateFromFiberToRoot(fiber: FiberNode) {
 	let node = fiber;
 	let parent = node.return;
@@ -76,7 +78,7 @@ function commitRoot(root: FiberRootNode) {
 		(finishedWork.subtreeFlags & MutationMask) !== NoFlags;
 	const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
 
-	if (subtreeHasEffect && rootHasEffect) {
+	if (subtreeHasEffect || rootHasEffect) {
 		// beforeMutation
 
 		// mutation Placement
@@ -97,6 +99,7 @@ function workLoop() {
 }
 
 function performUnitOfWork(fiber: FiberNode) {
+	// 这里放回的是当前的fiber.child
 	const next: FiberNode | null = beginWork(fiber);
 	// 生成fiber后，当前pendingProps就是缓存的props
 	fiber.memoizedProps = fiber.pendingProps;
@@ -113,13 +116,14 @@ function performUnitOfWork(fiber: FiberNode) {
 function completeUnitOfWork(fiber: FiberNode) {
 	let node: FiberNode | null = fiber;
 	do {
-		// 处理完当前节点后，再处理兄弟节点，处理完兄弟节点再处理父节点
+		// 处理完当前节点后，再处理兄弟节点
 		completeWork(node);
 		const sibling = node.sibling;
 		if (sibling !== null) {
 			workInProgress = sibling;
 			return;
 		}
+		// 处理完兄弟节点再处理父节点
 		node = node?.return;
 		workInProgress = node;
 	} while (node !== null);
