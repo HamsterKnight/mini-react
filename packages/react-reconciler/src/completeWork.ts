@@ -7,7 +7,12 @@ import {
 } from 'hostConfig';
 import {FiberNode} from './fiber';
 import {FunctionComponent, HostComponent, HostRoot, HostText} from './workTags';
-import {NoFlags} from './fiberFalgs';
+import {NoFlags, Update} from './fiberFalgs';
+
+function markUpdate(fiber: FiberNode) {
+	fiber.flags |= Update;
+}
+
 // completeWork是向上遍历的过程， 所以遍历到的节点是最靠上的节点，
 // 然后每次都运行bubbleProperties，这样就将当前节点中的子节点及兄弟节点的包含的flag副作用
 // 都冒泡当当前节点的subtreeFlags中，这样一直冒泡到根节点，如果根节点的subtreesFlags也就包含了
@@ -34,6 +39,11 @@ export const completeWork = (wip: FiberNode) => {
 		case HostText:
 			if (current !== null && wip.stateNode) {
 				// 更新流程update
+				const oldText = current.memoizedProps.content;
+				const newText = newProps.content;
+				if (oldText !== newText) {
+					markUpdate(wip);
+				}
 			} else {
 				// 1. 构建DOM
 

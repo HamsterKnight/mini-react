@@ -322,7 +322,6 @@ commit阶段的3个子阶段
 > tsconfig.json配置hostConfig的路径，只是用于ts的类型检查
 > 打包时，rollup不知道hostConfig的路径，所以需要通过插件`@rollup/plugin-alias`来进行配置
 
-
 ### 第七课 初探FC与实现
 
 第二种调试方式 FunctionComponent需要考虑的问题：
@@ -339,3 +338,185 @@ FC的工作同样植根于：
 
 采用vite的实时调试，他的好处是「实时看到源码运行效果」。
 
+### 第八课 实现useState
+
+hook脱离FC上下文，仅仅是普通函数，如何让他拥有感知上下文环境的能力？
+
+比如说：
+
+- hook如何知道在另一个hook的上下文环境内执行？
+
+```tsx
+function App() {
+	useEffect(() => {
+		// 执行useState时怎么
+		useState(8);
+	});
+}
+```
+
+- hook怎么知道当前是mount还是update？
+  解决方案：在不同上下文中调用的hook不是同一个函数。
+  > 不同的阶段，有不同hooks的集合
+  > ![alt text](nodeImg/hooks-process.png)
+
+实现「内部数据共享层」时的注意事项：
+以浏览器举例，Recgnciler＋hostConfig＝ ReactDOM
+
+增加「内部数据共享层」，意味着Reconciler与React产生关联，进而意味着ReactDOM与React 产生关联。
+
+如果两个包「产生关联」，在打包时需要考虑：两者的代码是打包在一起还是分开？
+
+如果打包在一起，意味着打包后的ReactDOM中会包含React的代码，那么ReactDOM中会包含 一个内部数据共享层，React中也会包含一个内部数据共享层，这两者不是同一个内部数据共享层。
+
+而我们希望两者共享数据，所以不希望ReactDOM中会包含React的代码，所以需要在react-dom.config.js中增加external外部包的配置
+
+- hook如何知道自身数据保存在哪里
+
+```ts
+function App() {
+	// 执行useState为什么能正常返回num
+	const [num] = useState(0);
+}
+```
+
+答案：可以记录正在render的FC对应的fiberNode，在fiberNode中保存hook数据
+
+> 面试题：为什么react中强调hook的在不同更新的时候调用顺序不能变？
+> 因为hook的数据是保存在一个链表中的，所以调用顺序要保持一致，才能通过memoizedState取到对应hook的正确的数据
+> ![alt text](nodeImg/fc-hooks-process.png)
+> fc的fiberNode的memoizedState属性对应hook的调用链表，然后每个hook的hook数据中又有一个memoizedState用来记录当前hook的数据
+> 对于FC对应的fiberNode，存在两层数据：
+
+·fiberNode.memoizedState对应Hooks链表
+
+·链表中每个hook对应自身的数据
+
+实现useState 包括2方面工作：
+
+1．实现mount时useState的实现
+
+2．实现dispatch方法，并接入现有更新流程内
+
+### 第九课 ReactElement测试用例
+
+本节课我们将实现第三种调试方式——用例调
+
+试，包括三部分内容：
+
+·实现第一个测试工具test—utils
+
+·实现测试环境
+
+·实现ReactElement用例
+
+与测试相关的代码都来自React仓库，可以先把React仓库下载下来：
+
+```sh
+git clone git@github.com:facebook/react 实现test-utils
+```
+
+这是用于测试的工具集，来源自
+
+`ReactTestUtils.js`，特点是：使用ReactDOM作为 宿主环境
+
+题外话：有没有其他测试工具？
+实现测试环境
+
+```sh
+pnpm i -D -w jest jest-config jest-environment-jsdom
+```
+
+为jest增加解释JSX的能力，安装Babel
+
+```sh
+pnpm i -D -w @babel/core @babel/preset-env  @babel/plugin-transform-react-jsx
+```
+
+新增babel.config.js
+
+```js
+module.exports = {
+	presets: ['@babel/preset-env'],
+	plugins: [['@babel/plugin-transform-react-jsx', {throwIfNamespace: false}]]
+};
+```
+
+### 第10课 初探update流程
+
+update流程与mount流程的区别。 对于beginWork：
+
+·需要处理ChildDeletion的情况
+
+·需要处理节点移动的情况（abc—＞bca）对于completeWork：
+
+·需要处理HostText内容更新的情况
+
+·需要处理HostComponent属性变化的情况 对于commitWork：
+
+·对于ChildDeletion，需要遍历被删除的子树 对于useState：
+
+·实现相对于mountState的updateState
+
+##### beginWork流程
+
+本节课仅处理单一节点，所以省去了「节点移动」的情况。我们需要处理：
+
+·singleElement
+
+·singleTextNode 处理流程为：
+
+1．比较是否可以复用current fiber
+
+a.比较key，如果key不同，不能复用
+b.比较type，如果type不同，不能复用
+
+c.如果key与type都相同，则可复用
+
+2．不能复用，则创建新的（同mount流程），可以复用则复用旧的
+
+注意：对于同一个fiberNode，即使反复更新，current、wip这两个fiberNode会重复使用
+
+·completeWork流程
+
+主要处理「标记Update」的情况，本节课我们处理HostText内容更新的情况。
+
+commitWork流程
+
+对于标记ChildDeletion的子树，由于子树中：
+
+·对于FC，需要处理useEffect unmout执行、 解绑ref
+
+·对于HostComponent，需要解绑ref
+
+·对于子树的「根HostComponent」，需要移 除DOM
+
+所以需要实现「遍历ChildDeletion子树」的流程
+
+对于useState
+
+需要实现：
+
+·针对update时的dispatcher
+
+·实现对标mountWorkInProgresHook的 updateWorklnProgresHook
+
+·实现updateState中「计算新state的逻辑」 其中updateWorkinProgresHook的实现需要考虑
+
+- hook数据从哪里来?
+  从current hook中来
+- 交互阶段触发的更新
+
+```HTML
+<div onClick={()=> update(1)}></div>
+```
+
+- render阶段触发的更新
+
+```tsx
+function App() {
+	const [num, setNum] = useState();
+	//触发更新
+	return <div>{num}</div>;
+}
+```

@@ -21,8 +21,8 @@ export class FiberNode {
 	alternate: FiberNode | null;
 	flags: Flags;
 	subtreeFlags: Flags; // 代表子树中的副作用
-
 	updateQueue: unknown;
+	deletions: FiberNode[] | null; // 更新时需要被删除的子节点
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
 		// 当前react元素的类型
@@ -55,6 +55,7 @@ export class FiberNode {
 		this.flags = NoFlags;
 		// 子树是否有副作用
 		this.subtreeFlags = NoFlags;
+		this.deletions = null;
 	}
 }
 
@@ -91,6 +92,7 @@ export const createWorkInProgress = (
 		// 清除上一次的副作用
 		wip.flags = NoFlags;
 		wip.subtreeFlags = NoFlags;
+		wip.deletions = null;
 	}
 	wip.type = current.type;
 	// updateQueue的结构设着，是为了让状态对象共用

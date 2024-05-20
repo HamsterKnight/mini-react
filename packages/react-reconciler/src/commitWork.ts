@@ -1,7 +1,18 @@
-import {Container, appendChildToContainer} from 'hostConfig';
+import {
+	Container,
+	appendChildToContainer,
+	commitUpdate,
+	removeChild
+} from 'hostConfig';
 import {FiberNode} from './fiber';
-import {MutationMask, NoFlags, Placement} from './fiberFalgs';
-import {HostComponent, HostRoot, HostText} from './workTags';
+import {
+	ChildDeletion,
+	MutationMask,
+	NoFlags,
+	Placement,
+	Update
+} from './fiberFalgs';
+import {FunctionComponent, HostComponent, HostRoot, HostText} from './workTags';
 
 let nextEffect: FiberNode | null = null;
 export const commitMutationEffects = (finishedWork: FiberNode) => {
@@ -32,6 +43,7 @@ export const commitMutationEffects = (finishedWork: FiberNode) => {
 
 const commitMutationEffectsOnFiber = (finishedWork: FiberNode) => {
 	const flags = finishedWork.flags;
+	// 处理插入
 	if ((flags & Placement) !== NoFlags) {
 		commitPlacement(finishedWork);
 		// 插入操作完成，去除插入标识
@@ -39,7 +51,88 @@ const commitMutationEffectsOnFiber = (finishedWork: FiberNode) => {
 		// 例如 Placement为 0001， 取反值为1110, 假设flags为0011，经过计算后，flags为0010
 		finishedWork.flags &= ~Placement;
 	}
+	// 处理更新
+	if ((flags & Update) !== NoFlags) {
+		commitUpdate(finishedWork);
+		finishedWork.flags &= ~Update;
+	}
+	// 处理删除
+	if ((flags & ChildDeletion) !== NoFlags) {
+		const deletions = finishedWork.deletions;
+		if (deletions !== null) {
+			deletions.forEach((childToDelete) => {
+				commitDeletion(childToDelete);
+			});
+		}
+		finishedWork.flags &= ~ChildDeletion;
+	}
 };
+
+function commitDeletion(childToDelete: FiberNode) {
+	let rootHostNode: FiberNode | null = null;
+	// 递归子树
+	commitNestedComponent(childToDelete, (unmountFiber) => {
+		switch (unmountFiber.tag) {
+			case HostComponent:
+				if (rootHostNode === null) {
+					rootHostNode = unmountFiber;
+				}
+				// TODO 解绑ref
+				return;
+			case HostText:
+				if (rootHostNode === null) {
+					rootHostNode = unmountFiber;
+				}
+			// eslint-disable-next-line no-fallthrough
+			case FunctionComponent:
+				// TODO useEffect unmount、解绑ref
+				return;
+			default:
+				if (__DEV__) {
+					console.log('未处理的unmount类型', unmountFiber);
+				}
+		}
+	});
+	// 移除rootHostComponent的DOM
+	if (rootHostNode !== null) {
+		const hostParent = getHostParent(childToDelete);
+		if (hostParent !== null) {
+			removeChild((rootHostNode as FiberNode).stateNode, hostParent);
+		}
+	}
+	childToDelete.return = null;
+	childToDelete.child = null;
+}
+
+function commitNestedComponent(
+	root: FiberNode,
+	onCommitUnmount: (fiber: FiberNode) => void
+) {
+	let node = root;
+	// eslint-disable-next-line no-constant-condition
+	while (true) {
+		onCommitUnmount(node);
+		if (node.child !== null) {
+			// 向下遍历
+			node.child.return = node;
+			node = node.child;
+			continue;
+		}
+		if (node === root) {
+			// 终止条件
+			return;
+		}
+		while (node.sibling === null) {
+			if (node.return === null || node.return === root) {
+				return;
+			}
+			//向上归
+			node = node.return;
+		}
+		node.sibling.return = node.return;
+		node = node.sibling;
+	}
+}
 
 const commitPlacement = (finishedWork: FiberNode) => {
 	// finishedWork ~ DOM

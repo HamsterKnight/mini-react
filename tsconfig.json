@@ -1,6 +1,7 @@
 {
 	"compileOnSave": true,
 	"include": ["./packages/**/*","typing.d.ts" ],
+	"exclude": ["./apps/**/*"],
 	"compilerOptions": {
 		"target": "ESNext",
 		"useDefineForClassFields": true,

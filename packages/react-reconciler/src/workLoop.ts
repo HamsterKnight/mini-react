@@ -12,7 +12,7 @@ function prepareFreshStack(root: FiberRootNode) {
 	// workInProgress：触发更新后，正在reconciler中计算的fiberNode树，首屏渲染得到的类型是hostRootFiber
 	workInProgress = createWorkInProgress(root.current, {});
 }
-// 实现调度功能
+// 实现调度功能，mount的时候传递的是hostRootFiber
 export function scheduleUpdateOnFiber(fiber: FiberNode) {
 	// 找到最顶层的fiberRootNode
 	const root = markUpdateFromFiberToRoot(fiber);
@@ -48,7 +48,6 @@ function renderRoot(root: FiberRootNode) {
 			if (__DEV__) {
 				console.log('workLoop发生错误', e);
 			}
-
 			workInProgress = null;
 		}
 		// eslint-disable-next-line no-constant-condition
@@ -99,7 +98,7 @@ function workLoop() {
 }
 
 function performUnitOfWork(fiber: FiberNode) {
-	// 这里放回的是当前的fiber.child
+	// 这里返回的是当前的fiber.child
 	const next: FiberNode | null = beginWork(fiber);
 	// 生成fiber后，当前pendingProps就是缓存的props
 	fiber.memoizedProps = fiber.pendingProps;

@@ -3,7 +3,7 @@ import {getPackageJSON, resolvePkgPath, getBaseRollupPlugins} from './utils';
 import generatePackageJson from 'rollup-plugin-generate-package-json';
 import alias from '@rollup/plugin-alias';
 
-const {name, module} = getPackageJSON('react-dom');
+const {name, module, peerDependencies} = getPackageJSON('react-dom');
 // react包的路径
 const pkgPath = resolvePkgPath(name);
 // react产物路径
@@ -24,6 +24,7 @@ export default [
 				format: 'umd'
 			}
 		],
+		external: [...Object.keys(peerDependencies)],
 		plugins: [
 			...getBaseRollupPlugins(),
 			// webpack resolve alias
@@ -48,24 +49,18 @@ export default [
 				})
 			})
 		]
+	},
+	// react-test-utils
+	{
+		input: `${pkgPath}/test-utils.ts`,
+		output: [
+			{
+				file: `${pkgDistPath}/test-utils.js`,
+				name: 'testUtils',
+				format: 'umd'
+			}
+		],
+		external: ['react', 'react-dom'],
+		plugins: getBaseRollupPlugins()
 	}
-	// jsx-runtime
-	// {
-	// 	input: `${pkgPath}/src/jsx.ts`,
-	// 	output: [
-	// 		// jsx-runtime
-	// 		{
-	// 			file: `${pkgDistPath}/jsx-runtime.js`,
-	// 			name: 'jsx-runtime',
-	// 			format: 'umd'
-	// 		},
-	// 		// jsx-dev-runtime
-	// 		{
-	// 			file: `${pkgDistPath}/jsx-dev-runtime.js`,
-	// 			name: 'jsx-dev-runtime',
-	// 			format: 'umd'
-	// 		}
-	// 	],
-	// 	plugins: getBaseRollupPlugins()
-	// }
 ];
