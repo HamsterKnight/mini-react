@@ -7,6 +7,7 @@ import {ChildDeletion, Placement} from './fiberFalgs';
 // 是否追踪副作用
 function ChildReconciler(shouldTrackEffects: boolean) {
 	function deleteChild(returnFiber: FiberNode, ChildToDelete: FiberNode) {
+		// mount阶段，不存在删除，所以直接返回即可
 		if (!shouldTrackEffects) {
 			return;
 		}
@@ -25,7 +26,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 		currentFiber: FiberNode | null,
 		element: ReactElementType
 	) {
-		const key = returnFiber.key;
+		const key = element.key;
 		// update流程
 		if (currentFiber !== null) {
 			// key相同
